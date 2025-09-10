@@ -586,7 +586,12 @@ public:
     }
     bool connect(const std::string& server, const std::string& port)
     {
-        ip::tcp::resolver resolver(stream.get_io_service());
+        //ip::tcp::resolver resolver(stream.get_io_service());
+#if BOOST_VERSION >= 107000
+    ip::tcp::resolver resolver(stream.get_executor());
+#else
+    ip::tcp::resolver resolver(stream.get_io_service());
+#endif
         ip::tcp::resolver::query query(server.c_str(), port.c_str());
         ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         ip::tcp::resolver::iterator end;
@@ -621,6 +626,17 @@ template <typename Protocol>
 class AcceptedConnectionImpl : public AcceptedConnection
 {
 public:
+#if BOOST_VERSION >= 107000
+    AcceptedConnectionImpl(
+            const typename Protocol::socket::executor_type& executor,
+            ssl::context &context,
+            bool fUseSSL) :
+        sslStream(executor, context),
+        _d(sslStream, fUseSSL),
+        _stream(_d)
+    {
+    }
+#else
     AcceptedConnectionImpl(
             asio::io_service& io_service,
             ssl::context &context,
@@ -630,6 +646,7 @@ public:
         _stream(_d)
     {
     }
+#endif
 
     virtual std::iostream& stream()
     {
@@ -673,7 +690,12 @@ static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketA
                    const bool fUseSSL)
 {
     // Accept connection
+    //AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(acceptor->get_io_service(), context, fUseSSL);
+#if BOOST_VERSION >= 107000
+    AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(acceptor->get_executor(), context, fUseSSL);
+#else
     AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(acceptor->get_io_service(), context, fUseSSL);
+#endif
 
     acceptor->async_accept(
             conn->sslStream.lowest_layer(),
@@ -762,7 +784,12 @@ void StartRPCThreads()
 
     assert(rpc_io_service == NULL);
     rpc_io_service = new asio::io_service();
+    //rpc_ssl_context = new ssl::context(*rpc_io_service, ssl::context::sslv23);
+#if BOOST_VERSION >= 107000
+    rpc_ssl_context = new ssl::context(ssl::context::sslv23);
+#else
     rpc_ssl_context = new ssl::context(*rpc_io_service, ssl::context::sslv23);
+#endif
 
     const bool fUseSSL = GetBoolArg("-rpcssl");
 
@@ -781,7 +808,12 @@ void StartRPCThreads()
         else printf("ThreadRPCServer ERROR: missing server private key file %s\n", pathPKFile.string().c_str());
 
         string strCiphers = GetArg("-rpcsslciphers", "TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH");
-        SSL_CTX_set_cipher_list(rpc_ssl_context->impl(), strCiphers.c_str());
+        //SSL_CTX_set_cipher_list(rpc_ssl_context->impl(), strCiphers.c_str());
+#if BOOST_VERSION >= 107000
+    SSL_CTX_set_cipher_list(rpc_ssl_context->native_handle(), strCiphers.c_str());
+#else
+    SSL_CTX_set_cipher_list(rpc_ssl_context->impl(), strCiphers.c_str());
+#endif
     }
 
     // Try a dual IPv6/IPv4 socket, falling back to separate IPv4 and IPv6 sockets
@@ -1061,7 +1093,12 @@ Object CallRPC(const string& strMethod, const Array& params)
     // Connect to localhost
     bool fUseSSL = GetBoolArg("-rpcssl");
     asio::io_service io_service;
+    //ssl::context context(io_service, ssl::context::sslv23);
+#if BOOST_VERSION >= 107000
+    ssl::context context(ssl::context::sslv23);
+#else
     ssl::context context(io_service, ssl::context::sslv23);
+#endif
     context.set_options(ssl::context::no_sslv2);
     asio::ssl::stream<asio::ip::tcp::socket> sslStream(io_service, context);
     SSLIOStreamDevice<asio::ip::tcp> d(sslStream, fUseSSL);

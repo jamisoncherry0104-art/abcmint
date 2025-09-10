@@ -4,6 +4,7 @@
 #include "init.h"
 #include "miner.h"
 #include "wallet.h"
+#include <bitset>
 
 
 using namespace std;
