@@ -1227,6 +1227,14 @@ static const char *strMainNetDNSSeed[][2] = {
 
     {"raq-planck.com", "raq-planck.com"},
     {"raq-turing.com", "raq-turing.com"},
+    {"abcmint-bohr.com", "abcmint-bohr.com"},
+    {"abcmint-einstein.com", "abcmint-einstein.com"},
+    {"abcmint-euclid.com","abcmint-euclid.com"},
+    {"abcmint-feynman.com", "abcmint-feynman.com"},
+    {"abcmint-gauss.com", "abcmint-gauss.com"},
+    {"abcmint-newton.com", "abcmint-newton.com"},
+    {"abcmint-planck.com", "abcmint-planck.com"},
+    {"abcmint-turing.com", "abcmint-turing.com"},
 
     {NULL, NULL}
 };
@@ -1235,6 +1243,14 @@ static const char *strTestNetDNSSeed[][2] = {
 
     {"raq-planck.com", "raq-planck.com"},
     {"raq-turing.com", "raq-turing.com"},
+    {"abcmint-bohr.com", "abcmint-bohr.com"},
+    {"abcmint-einstein.com", "abcmint-einstein.com"},
+    {"abcmint-euclid.com","abcmint-euclid.com"},
+    {"abcmint-feynman.com", "abcmint-feynman.com"},
+    {"abcmint-gauss.com", "abcmint-gauss.com"},
+    {"abcmint-newton.com", "abcmint-newton.com"},
+    {"abcmint-planck.com", "abcmint-planck.com"},
+    {"abcmint-turing.com", "abcmint-turing.com"},
 
     {NULL, NULL}
 };
